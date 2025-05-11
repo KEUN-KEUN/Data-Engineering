@@ -5,6 +5,8 @@ services:
     image: wurstmeister/zookeeper
     ports:
       - "${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}"
+    networks:
+      - data-pipeline-net
 
   kafka:
     container_name: kafka-container
@@ -15,3 +17,9 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_ADVERTISED_HOST_NAME}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-container:${ZOOKEEPER_PORT}
       KAFKA_CREATE_TOPICS: ${KAFKA_CREATE_TOPICS}
+    networks:
+      - data-pipeline-net
+
+networks:
+  data-pipeline-net:
+    driver: bridge

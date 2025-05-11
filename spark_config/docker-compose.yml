@@ -2,13 +2,17 @@ version: '3.8'
 
 services:
   spark-master:
-    image: bitnami/spark:latest
+    build:
+      context: .  # Dockerfile이 있는 경로
+      dockerfile: Dockerfile  # Dockerfile 위치 지정
     container_name: spark-master
     environment:
       - SPARK_MODE=master
     ports:
       - "7077:7077"   # Spark master 포트
-      - "8080:8080"   # Spark web UI
+      - "8081:8081"   # Spark web UI
+    volumes:
+      - ./spark:/opt/bitnami/spark/jobs  # 로컬 디렉토리와 컨테이너 디렉토리 마운트
 
   spark-worker-1:
     image: bitnami/spark:latest
@@ -19,4 +23,10 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8081:8081"   # Worker UI
+      - "8082:8082"   # Worker UI
+    volumes:
+      - ./spark:/opt/bitnami/spark/jobs  # 로컬 디렉토리와 컨테이너 디렉토리 마운트
+
+networks:
+  data-pipeline-net:
+    driver: bridge

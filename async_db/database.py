@@ -22,7 +22,7 @@ async def createTableIfNeccessary(dbPool):
     workDirectory = os.getcwd()
     print(f"현재 작업 디렉토리: {workDirectory}")
 
-    sqlFileList = glob.glob('../sql/*.sql')
+    sqlFileList = glob.glob('sql/*.sql')
     print(f"sqlFileList: {sqlFileList}")
 
     # DB Pool을 획득하여 DB Connection 확보

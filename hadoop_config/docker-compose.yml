@@ -15,3 +15,7 @@ services:
       - HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check=false
     volumes:
       - ./data/hadoop:/hadoop/dfs
+
+networks:
+  data-pipeline-net:
+    driver: bridge
