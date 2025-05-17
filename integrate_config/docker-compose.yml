@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # === PostgreSQL (Airflow DB) ===
   postgres:
     image: postgres:13
     environment:
@@ -13,13 +12,11 @@ services:
     networks:
       - data-pipeline-net
 
-  # === Redis (Airflow Broker) ===
   redis:
     image: redis:6
     networks:
       - data-pipeline-net
 
-  # === Airflow Webserver ===
   airflow-webserver:
     image: apache/airflow:2.9.1
     restart: always
@@ -35,11 +32,11 @@ services:
       - ./dags:/opt/airflow/dags
     ports:
       - "8082:8080"
-    command: webserver
+    command: >
+      bash -c "pip install --no-cache-dir kafka-python && exec airflow webserver"
     networks:
       - data-pipeline-net
 
-  # === Airflow Scheduler ===
   airflow-scheduler:
     image: apache/airflow:2.9.1
     restart: always
@@ -52,44 +49,27 @@ services:
       AIRFLOW__CORE__BROKER_URL: redis://redis:6379/0
     volumes:
       - ./dags:/opt/airflow/dags
-    command: scheduler
+    command: >
+      bash -c "pip install --no-cache-dir kafka-python && exec airflow scheduler"
     networks:
       - data-pipeline-net
 
-  # === Airflow Flower ===
   airflow-flower:
     image: apache/airflow:2.9.1
-    depends_on:
-      - airflow-webserver
-      - airflow-scheduler
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    command: celery flower
     ports:
       - "5555:5555"
-    command: flower
-    networks:
-      - data-pipeline-net
-
-  # === Hadoop (NameNode Only) ===
-  hadoop:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
-    container_name: hadoop
-    ports:
-      - "9870:9870"   # HDFS Web UI
-      - "8088:8088"   # YARN Web UI
-      - "9000:9000"   # NameNode RPC
     environment:
-      - CLUSTER_NAME=test
-      - CORE_CONF_fs_defaultFS=hdfs://localhost:9000
-      - HDFS_CONF_dfs_replication=1
-      - HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check=false
-    volumes:
-      - ./data/hadoop:/hadoop/dfs
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow  # 추가
+    depends_on:
+      - redis
+      - airflow-webserver
     networks:
       - data-pipeline-net
 
-  # === Zookeeper ===
   zookeeper:
     container_name: zookeeper-container
     image: wurstmeister/zookeeper
@@ -98,54 +78,26 @@ services:
     networks:
       - data-pipeline-net
 
-  # === Kafka ===
   kafka:
-    container_name: kafka-container
+    container_name: kafka
     image: wurstmeister/kafka
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-container:2181
-      KAFKA_CREATE_TOPICS: "test-topic:1:1"
+      KAFKA_CREATE_TOPICS: "test-topic:1:1,marketing.analysis.request:1:1"
     networks:
       - data-pipeline-net
-
-  # === Spark Master ===
-  spark-master:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: spark-master
-    environment:
-      - SPARK_MODE=master
-    ports:
-      - "7077:7077"
-      - "8080:8080"
-    volumes:
-      - ./:/opt/bitnami/spark/jobs
-    networks:
-      - data-pipeline-net
-
-  # === Spark Worker ===
-  spark-worker-1:
-    image: bitnami/spark:latest
-    container_name: spark-worker-1
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-    depends_on:
-      - spark-master
-    ports:
-      - "8083:8082"
-    volumes:
-      - ./:/opt/bitnami/spark/jobs
-    networks:
-      - data-pipeline-net
-
-volumes:
-  postgres-db-volume:
 
 networks:
   data-pipeline-net:
     driver: bridge
+
+volumes:
+  postgres-db-volume:
+    driver: local

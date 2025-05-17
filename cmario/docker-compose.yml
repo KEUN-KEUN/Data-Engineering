@@ -1,8 +1,9 @@
 version: "3.8"
 services:
-  supermario:
-    image: pengbai/docker-supermario
-    container_name: supermario
-    ports:
-      - "8081:8080"
-    restart: unless-stopped
+	supermario:
+		image: pengbai/docker-supermario
+		container_name: supermario
+		ports:
+			- "8600:8080"
+		restart: unless-stopped
+

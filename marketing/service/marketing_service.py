@@ -6,5 +6,13 @@ class MarketingService(ABC):
         pass
 
     @abstractmethod
+    def generateVirtualMarketingDataSet(self):
+        pass
+
+    @abstractmethod
     def requestAnalysis(self):
+        pass
+
+    @abstractmethod
+    def requestDataList(self):
         pass

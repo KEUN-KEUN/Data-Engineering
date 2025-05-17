@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  kdc-kadmin:
+    build: ./kdc-kadmin
+    container_name: kdc-kadmin
+    env_file: kerberos.env
+    volumes:
+      - /dev/urandom:/dev/random
+    ports:
+      - "88:88"
+      - "749:749"
+
+  kerberos-client:
+    build: ./kerberos-client
+    container_name: kerberos-client
+    env_file: kerberos.env
+    depends_on:
+      - kdc-kadmin
+    entrypoint: /bin/bash -c "sleep 10 && /tmp/configureKerberosClient.sh"
