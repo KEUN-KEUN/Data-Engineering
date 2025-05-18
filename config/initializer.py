@@ -21,18 +21,18 @@ async def init_vector_db(app: FastAPI):
 
 async def init_kafka(app: FastAPI):
     app.state.kafka_producer = AIOKafkaProducer(
-        bootstrap_servers='localhost:9092',
+        bootstrap_servers='localhost:9094',
         client_id='fastapi-kafka-producer'
     )
     app.state.kafka_consumer = AIOKafkaConsumer(
         'completion_topic',
-        bootstrap_servers='localhost:9092',
+        bootstrap_servers='localhost:9094',
         group_id="my_group",
         client_id='fastapi-kafka-consumer'
     )
     app.state.kafka_test_topic_consumer = AIOKafkaConsumer(
         'test-topic',
-        bootstrap_servers='localhost:9092',
+        bootstrap_servers='localhost:9094',
         group_id="another_group",
         client_id='fastapi-kafka-consumer'
     )

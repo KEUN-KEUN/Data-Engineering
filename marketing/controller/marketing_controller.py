@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
 from fastapi.responses import JSONResponse
 
 from aiomysql import Pool
 
 from async_db.database import getMySqlPool
+from marketing.controller.request_form.read_request_form import ReadRequestForm
+from marketing.controller.request_form.remove_request_form import RemoveRequestForm
+from marketing.controller.request_form.update_request_form import UpdateRequestForm
 from marketing.service.marketing_service_impl import MarketingServiceImpl
 
 marketingRouter = APIRouter()
@@ -71,6 +74,41 @@ async def requestVirtualDataList(
 
 @marketingRouter.post("/marketing/virtual-data-read")
 async def requestVirtualDataRead(
+    requestForm: ReadRequestForm = Body(...),
     marketingService: MarketingServiceImpl = Depends(injectMarketingService)
 ):
-    pass
+    try:
+        customer_id = requestForm.customer_id
+        result = await marketingService.readVirtualMarketingData(customer_id)
+        return JSONResponse(status_code=200, content={"status": "success", "data": result})
+
+    except Exception as e:
+        print(f"❌ Error in requestVirtualDataRead(): {str(e)}")
+        raise HTTPException(status_code=500, detail="서버 내부 오류 발생")
+
+@marketingRouter.post("/marketing/virtual-data-update")
+async def requestVirtualDataUpdate(
+    requestForm: UpdateRequestForm = Body(...),
+    marketingService: MarketingServiceImpl = Depends(injectMarketingService)
+):
+    try:
+        result = await marketingService.updateVirtualMarketingData(requestForm)
+        return JSONResponse(status_code=200, content={"status": "success", "updated": result})
+
+    except Exception as e:
+        print(f"❌ Error in requestVirtualDataUpdate(): {str(e)}")
+        raise HTTPException(status_code=500, detail="서버 내부 오류 발생")
+
+@marketingRouter.post("/marketing/virtual-data-remove")
+async def requestVirtualDataRemove(
+    requestForm: RemoveRequestForm = Body(...),
+    marketingService: MarketingServiceImpl = Depends(injectMarketingService)
+):
+    try:
+        deleted = await marketingService.removeVirtualMarketingData(requestForm.customer_id)
+        return JSONResponse(status_code=200, content={"status": "success", "deleted": deleted})
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"❌ Error in requestVirtualDataRemove(): {str(e)}")
+        raise HTTPException(status_code=500, detail="서버 내부 오류 발생")

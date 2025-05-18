@@ -28,6 +28,7 @@ with DAG(
     default_args=default_args,
     schedule_interval='@once',
     catchup=False,
+    is_paused_upon_creation=False,
     tags=['kafka']
 ) as dag:
     task = PythonOperator(

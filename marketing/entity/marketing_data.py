@@ -32,3 +32,12 @@ class MarketingData(BaseModel):
         if isinstance(v, (int, str)) and str(v).isdigit():
             return Gender.from_int(v)
         return Gender(v.upper())
+
+    def to_dict(self):
+        return {
+            "customer_id": self.customer_id,
+            "age": self.age,
+            "gender": self.gender.value,
+            "campaign_type": self.campaign_type.value,
+            "user_response": self.user_response.value,
+        }

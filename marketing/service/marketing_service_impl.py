@@ -1,12 +1,13 @@
 import uuid
 from random import choices, randint
-from fastapi import Request
+from fastapi import Request, HTTPException
 from datetime import datetime
 import json
 
 from aiomysql import Pool
 
 from kafka.constant.constant_config import ANALYSIS_REQUEST_TOPIC
+from marketing.controller.request_form.update_request_form import UpdateRequestForm
 from marketing.entity.marketing_data import MarketingData
 from marketing.entity.campaign_type import CampaignType
 from marketing.entity.gender import Gender
@@ -126,5 +127,39 @@ class MarketingServiceImpl(MarketingService):
             }
 
     async def requestDataList(self):
-        return await self.marketingRepository.findAll()
+        dataList = await self.marketingRepository.findAll()
+        return [data.to_dict() for data in dataList]
 
+    async def readVirtualMarketingData(self, customer_id: int):
+        data = await self.marketingRepository.findById(customer_id)
+        if not data:
+            raise ValueError(f"데이터 없음: customer_id={customer_id}")
+
+        return {
+            "customer_id": data.customer_id,
+            "age": data.age,
+            "gender": data.gender.value,
+            "campaign_type": data.campaign_type.value,
+            "user_response": data.user_response.value,
+        }
+
+    async def updateVirtualMarketingData(self, form: UpdateRequestForm) -> int:
+        existing = await self.marketingRepository.findById(form.customer_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail="해당 고객 데이터를 찾을 수 없습니다.")
+
+        updated = MarketingData(
+            customer_id=existing.customer_id,
+            age=form.age if form.age is not None else existing.age,
+            gender=form.gender if form.gender is not None else existing.gender,
+            campaign_type=form.campaign_type if form.campaign_type is not None else existing.campaign_type,
+            user_response=form.user_response if form.user_response is not None else existing.user_response
+        )
+
+        return await self.marketingRepository.update(updated)
+
+    async def removeVirtualMarketingData(self, customer_id: int) -> int:
+        existing = await self.marketingRepository.findById(customer_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail="해당 마케팅 데이터를 찾을 수 없습니다.")
+        return await self.marketingRepository.deleteById(customer_id)
