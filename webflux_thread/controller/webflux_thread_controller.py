@@ -1,38 +1,39 @@
-import json
-import asyncio
-import threading
-from concurrent.futures import ThreadPoolExecutor
-
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-
+from concurrent.futures import ThreadPoolExecutor
+import threading
+import asyncio
+import json
 
 webfluxThreadRouter = APIRouter()
+executor = ThreadPoolExecutor(max_workers=10)
+
+
+def step1_request_logic():
+    before = threading.get_ident()
+    return before
+
+
+def step2_blocking_task(before_id):
+    inside = threading.get_ident()
+    return {"before": before_id, "inside": inside}
+
+
+def step3_finalize_response(data):
+    data["after"] = threading.get_ident()
+    return data
+
 
 @webfluxThreadRouter.get("/webflux/thread-test")
-def webflux_thread_test_sync():
-    thread_id_request = threading.get_ident()
-    print(f"[1] Request handler - thread id: {thread_id_request}")
+async def webflux_thread_test():
+    before = await asyncio.get_event_loop().run_in_executor(executor, step1_request_logic)
 
-    def blocking_task():
-        thread_id_executor = threading.get_ident()
-        print(f"[2] Inside ThreadPoolExecutor - thread id: {thread_id_executor}")
-        import time; time.sleep(1)
-        return thread_id_executor
+    inside_data = await asyncio.get_event_loop().run_in_executor(executor, step2_blocking_task, before)
 
-    # run task in executor
-    with ThreadPoolExecutor(max_workers=10) as local_executor:
-        future = local_executor.submit(blocking_task)
-        thread_id_inside = future.result()
+    final_data = await asyncio.get_event_loop().run_in_executor(executor, step3_finalize_response, inside_data)
 
-    thread_id_response = threading.get_ident()
-    print(f"[3] Response handler - thread id: {thread_id_response}")
+    print("==== START ====")
+    print(json.dumps(final_data, indent=2))
+    print("==== END ====")
 
-    response_data = {
-        "request": thread_id_request,
-        "inside_executor": thread_id_inside,
-        "response": thread_id_response,
-    }
-
-    print(json.dumps(response_data, indent=2) + "\n", flush=True)
-    return JSONResponse(status_code=200, content=response_data)
+    return JSONResponse(content=final_data)
