@@ -9,6 +9,7 @@ from config.cors_config import CorsConfig
 from config.initializer import lifespan
 from kafka.kafka_controller import kafkaController
 from marketing.controller.marketing_controller import marketingRouter
+from system_log.controller.system_log_controller import systemLogRouter
 from webflux_thread.controller.webflux_thread_controller import webfluxThreadRouter
 from websocket.websocket_controller import websocketController
 from kafka.topic_manager import create_kafka_topics
@@ -31,6 +32,7 @@ app.include_router(kafkaController)
 app.include_router(websocketController)
 app.include_router(marketingRouter)
 app.include_router(webfluxThreadRouter)
+app.include_router(systemLogRouter)
 
 # 앱 실행
 if __name__ == "__main__":
