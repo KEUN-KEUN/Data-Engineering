@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 
-from kafka.kafka_utility import send_kafka_message
-from kafka.request_form.kafka_endpoinrt_request_form import KafkaEndpointRequestForm
+from kafka_system.kafka_utility import send_kafka_message
+from kafka_system.request_form.kafka_endpoinrt_request_form import KafkaEndpointRequestForm
 
 kafkaController = APIRouter()
 

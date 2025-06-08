@@ -1,3 +1,21 @@
+# docker compose run airflow-webserver airflow db init
+# docker-compose run --rm integrate_config_airflow-webserver airflow db init
+# docker run --rm \
+#  --network=integrate_config_data-pipeline-net \
+#  -e AIRFLOW__DATABASE__SQL_ALCHEMY_CONN='postgresql+psycopg2://airflow:airflow@postgres/airflow' \
+#  apache/airflow:2.9.1 \
+#  airflow db init
+# docker run --rm \
+#  --network=integrate_config_data-pipeline-net \
+#  -e AIRFLOW__DATABASE__SQL_ALCHEMY_CONN='postgresql+psycopg2://airflow:airflow@postgres/airflow' \
+#  apache/airflow:2.9.1 \
+#  airflow users create \
+#  --username eddi \
+#  --firstname Sanghoon \
+#  --lastname Lee \
+#  --role Admin \
+#  --email eddi@example.com \
+#  --password eddi@123
 version: '3.8'
 
 services:

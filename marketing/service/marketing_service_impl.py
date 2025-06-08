@@ -6,7 +6,7 @@ import json
 
 from aiomysql import Pool
 
-from kafka.constant.constant_config import ANALYSIS_REQUEST_TOPIC
+from kafka_system.constant.constant_config import ANALYSIS_REQUEST_TOPIC
 from marketing.controller.request_form.update_request_form import UpdateRequestForm
 from marketing.entity.marketing_data import MarketingData
 from marketing.entity.campaign_type import CampaignType

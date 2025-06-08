@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 from async_db.database import getMySqlPool, createTableIfNeccessary
 from vector_db.database import getMongoDBPool
-from kafka.consumer import testTopicConsume
+from kafka_system.consumer import testTopicConsume
 
 from redis.asyncio import Redis
 

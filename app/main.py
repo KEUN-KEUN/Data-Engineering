@@ -7,12 +7,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from config.cors_config import CorsConfig
 from config.initializer import lifespan
-from kafka.kafka_controller import kafkaController
+from kafka_system.kafka_controller import kafkaController
 from marketing.controller.marketing_controller import marketingRouter
 from system_log.controller.system_log_controller import systemLogRouter
 from webflux_thread.controller.webflux_thread_controller import webfluxThreadRouter
 from websocket.websocket_controller import websocketController
-from kafka.topic_manager import create_kafka_topics
+from kafka_system.topic_manager import create_kafka_topics
 
 # 초기 설정
 warnings.filterwarnings("ignore", category=aiomysql.Warning)

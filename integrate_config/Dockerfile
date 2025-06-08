@@ -1,16 +1,9 @@
-FROM ubuntu:22.04
+FROM apache/airflow:2.9.1
 
-# Install Java, Scala, Spark dependencies
-RUN apt-get update && apt-get install -y openjdk-11-jdk curl scala
+USER root
+RUN apt-get update && apt-get install -y default-jre
+USER airflow
 
-# Download and extract Spark
-RUN curl -L https://archive.apache.org/dist/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tgz | tar -xz -C /opt
+RUN pip install --no-cache-dir kafka-python apache-airflow-providers-apache-spark
 
-# Set Spark environment variables
-ENV SPARK_HOME=/opt/spark-3.1.2-bin-hadoop3.2
-ENV PATH=$SPARK_HOME/bin:$PATH
-
-# Create a user
-RUN useradd -ms /bin/bash sparkuser
-USER sparkuser
-WORKDIR /home/sparkuser
+RUN which airflow && airflow version

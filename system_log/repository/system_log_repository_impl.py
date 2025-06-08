@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from textwrap import dedent
 from typing import List
 
 from aiomysql import Pool
@@ -16,10 +17,10 @@ class SystemLogRepositoryImpl(SystemLogRepository):
         async with self.db_pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.executemany(
-                    """
-                    INSERT INTO system_logs (timestamp, user_id, action, duration_ms)
-                    VALUES (%s, %s, %s, %s)
-                    """,
+                    dedent("""
+                        INSERT INTO system_logs (timestamp, user_id, action, duration_ms)
+                        VALUES (%s, %s, %s, %s)
+                    """).strip(),
                     [
                         (log.timestamp, log.user_id, log.action, log.duration_ms)
                         for log in logs
