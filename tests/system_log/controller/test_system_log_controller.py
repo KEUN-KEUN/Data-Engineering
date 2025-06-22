@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from fastapi import FastAPI, status, Depends
 from unittest.mock import AsyncMock
 
-from system_log.router.system_log_router import systemLogRouter, injectSystemLogService
+from system_log.controller.system_log_controller import systemLogRouter, injectSystemLogService
 from system_log.service.system_log_service_impl import SystemLogServiceImpl
 
 

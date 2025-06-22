@@ -1,0 +1,33 @@
+from unittest.mock import patch, AsyncMock
+
+import pytest
+
+from aysnc_lab.repository.async_lab_repository_impl import AsyncLabRepositoryImpl
+
+
+# TDD (Test Driven Development)
+# DDD (Domain Driven Design)
+# TDD가 안되면 DDD도 잘 안됨
+# Test 코드 작성하세요 <<< 필수로 시키는데 이거 작성 못하면 사실상 그냥 불합격 판정 받습니다.
+@pytest.mark.asyncio
+async def test_save_token_to_queue():
+    repository = AsyncLabRepositoryImpl()
+    test_token = "just_for_test"
+
+    # 특정 Domain의 repository 구현체가 사용하는 asyncio.Queue()를 Mocking 하였음
+    # user_token_queue가 asyncio.Queue()에 해당하며 이 녀석을 mock_queue라는 이름으로 Mocking 하여 사용
+    with patch("aysnc_lab.repository.async_lab_repository_impl.user_token_queue") as mock_queue:
+        mock_queue.put = AsyncMock()
+
+        # 결국 우리가 관심이 있는 부분은 save_token_to_queue() 를 호출 했을 때
+        # 실제로 내부에 있는 user_token_queue가 put() 호출을 하냐?
+        # put이 동작한다면 사용자 토큰이 안정적으로 저장이 될 것이기 때문입니다.
+        await repository.save_token_to_queue(test_token)
+
+        # mock_queue는 Mocking 된 user_token_queue 였음.
+        # assert_awaited_once_with() 의 경우엔 어떤 파라미터(인자) 를 가지고 실행이 되었는지 검사
+        # 실제로 save_token_to_queue()를 호출하면 내부에서 user_token_queue.put()이 호출됨
+        # 호출하면서 실제 사용자 토큰인 test_token을 저장하려고 합니다.
+        # 그러므로 하단의 동작이 잘 이뤄졌다면 queue에는
+        # 임의의 사용자 토큰이 문제 없이 잘 배치되었을 것을 보장 할 수 있습니다.
+        mock_queue.put.assert_awaited_once_with(test_token)
