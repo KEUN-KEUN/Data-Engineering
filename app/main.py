@@ -5,6 +5,8 @@ import aiomysql
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
+
+from aysnc_lab.controller.async_lab_controller import asyncLabRouter
 from config.cors_config import CorsConfig
 from config.initializer import lifespan
 from kafka_system.kafka_controller import kafkaController
@@ -33,6 +35,7 @@ app.include_router(websocketController)
 app.include_router(marketingRouter)
 app.include_router(webfluxThreadRouter)
 app.include_router(systemLogRouter)
+app.include_router(asyncLabRouter)
 
 # 앱 실행
 if __name__ == "__main__":

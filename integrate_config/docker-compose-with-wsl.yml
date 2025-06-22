@@ -54,3 +54,5 @@ networks:
 volumes:
   postgres-db-volume:
     driver: local
+
+# docker-compose -f docker-compose-with-wsl.yml up -d
