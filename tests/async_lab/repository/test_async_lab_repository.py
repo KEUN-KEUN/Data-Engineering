@@ -31,3 +31,21 @@ async def test_save_token_to_queue():
         # 그러므로 하단의 동작이 잘 이뤄졌다면 queue에는
         # 임의의 사용자 토큰이 문제 없이 잘 배치되었을 것을 보장 할 수 있습니다.
         mock_queue.put.assert_awaited_once_with(test_token)
+
+@pytest.mark.asyncio
+async def test_set_user_status():
+    repository = AsyncLabRepositoryImpl()
+    test_token = "just_for_test"
+    status = "processing"
+
+    # new_callable=AsyncMock을 살펴봐야함
+    # 기존 동기 함수의 경우 patch를 통해 Mocking을 진행하였습니다.
+    # 비동기 함수의 경우 단순 Mocking으로는 커버가 안되기 때문에
+    # 이 작업들이 비동기용으로 사용하는 Mock이라는 명시적 표현으로서 AsyncMock이 필요합니다.
+    with patch(
+            "aysnc_lab.repository.async_lab_repository_impl.set_user_status",
+            new_callable=AsyncMock
+    ) as mock_set_status:
+        await repository.set_user_status(test_token, status)
+
+        mock_set_status.assert_called_once_with(test_token, status)
