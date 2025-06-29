@@ -22,3 +22,18 @@ def create_topic(request: Request):
 
     # 서비스 계층의 create_topic으로 topic_name을 전달
     return service.create_topic(topic_name)
+
+@kafkaManageRouter.post("/publish")
+async def publish_message(request: Request):
+    body = await request.json()
+    topic = body.get("topic")
+    message = body.get("message")
+
+    return await service.publish(topic, message)
+
+@kafkaManageRouter.post("/subscribe")
+async def subscribe_topic(request: Request):
+    body = await request.json()
+    topic = body.get("topic")
+
+    return await service.subscribe(topic)

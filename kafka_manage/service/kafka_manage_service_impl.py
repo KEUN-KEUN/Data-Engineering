@@ -8,3 +8,10 @@ class KafkaManageServiceImpl(KafkaManageService):
 
     def create_topic(self, topic_name: str) -> dict:
         return self.repository.create_topic(topic_name)
+
+    async def publish(self, topic: str, message: dict) -> dict:
+        await self.repository.send_message(topic, message)
+        return { "status": "메시지 전송 완료" }
+
+    async def subscribe(self, topic: str) -> dict:
+        return await self.repository.subscribe(topic)
