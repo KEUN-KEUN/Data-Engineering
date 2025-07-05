@@ -47,6 +47,19 @@ services:
     networks:
       - data-pipeline-net
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "9999:8080"  # 외부 접속 포트는 9999로, 내부는 8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - data-pipeline-net
+
 networks:
   data-pipeline-net:
     driver: bridge

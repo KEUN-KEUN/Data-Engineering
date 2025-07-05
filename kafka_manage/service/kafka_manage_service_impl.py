@@ -15,3 +15,6 @@ class KafkaManageServiceImpl(KafkaManageService):
 
     async def subscribe(self, topic: str) -> dict:
         return await self.repository.subscribe(topic)
+
+    async def unsubscribe(self, topic: str) -> dict:
+        return await self.repository.unsubscribe(topic)

@@ -13,3 +13,7 @@ class KafkaManageRepository(ABC):
     @abstractmethod
     async def subscribe(self, topic: str) -> dict:
         pass
+
+    @abstractmethod
+    async def unsubscribe(self, topic: str) -> dict:
+        pass

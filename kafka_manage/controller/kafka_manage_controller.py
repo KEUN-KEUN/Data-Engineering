@@ -37,3 +37,10 @@ async def subscribe_topic(request: Request):
     topic = body.get("topic")
 
     return await service.subscribe(topic)
+
+@kafkaManageRouter.post("/unsubscribe")
+async def unsubscribe_topic(request: Request):
+    body = await request.json()
+    topic = body.get("topic")
+
+    return await service.unsubscribe(topic)

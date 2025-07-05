@@ -89,3 +89,25 @@ class KafkaManageRepositoryImpl(KafkaManageRepository):
             print(f"[Kafka][{topic}] {e}")
         finally:
             await consumer.stop()
+
+    async def unsubscribe(self, topic: str) -> dict:
+        # 현재 topic을 구독 중인지 확인
+        task = self.consumer_tasks.get(topic)
+        if not task:
+            return { "message": f"현재 구독중인 topic({topic})이 아닙니다." }
+
+        # 보다 복잡한 연산인 경우엔 여전히 작업이 진행중일 수 있음
+        # task.done() 을 통해서 task가 완료 되었는지 체크합니다.
+        # 만약 아직 종료되지 않았다면 task.cancel()을 통해 작업 취소를 진행합니다.
+        # cancel()이 즉시 중지하지는 않으며 CancelledError Exception을 유발합니다.
+        # 만약 정상적으로 task가 취소되면 그냥 다음으로 진행
+        if not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+
+        # 앞서 등록한 구독 태스크를 정리합니다.
+        del self.consumer_tasks[topic]
+        return { "message": f"topic({topic}) 구독 해제가 완료되었습니다." }
